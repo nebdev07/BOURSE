@@ -1,0 +1,14 @@
+---
+description: BRVM — documentation progressive obligatoire
+alwaysApply: true
+---
+
+# Documentation progressive
+
+Toute capacité livrée avance `.docs/` dans le même chantier.
+
+- `current_state.md` + `changelog.md` a minima
+- ADR si décision
+- `database.md` / `business.md` / `roadmap.md` si touchés
+- Ne jamais effacer une info : amender ou marquer obsolete
+- Distinguer spécifié vs implémenté

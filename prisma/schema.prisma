@@ -1,0 +1,272 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id          String    @id
+  symbol      String    @unique
+  name        String
+  sector      String
+  country     String
+  listingDate DateTime?
+  status      String
+}
+
+model DataSource {
+  id                 String    @id
+  name               String
+  type               String
+  url                String?
+  priority           Int
+  active             Boolean
+  lastSuccessfulSync DateTime?
+  lastFailure        DateTime?
+  scraperVersion     String?
+}
+
+model DataSourceFailure {
+  id        String   @id
+  sourceId  String
+  timestamp DateTime
+  error     String
+  payload   String?
+}
+
+model MarketQuote {
+  id            String   @id
+  symbol        String
+  date          DateTime
+  open          Float
+  high          Float
+  low           Float
+  close         Float
+  volume        Float
+  adjustedClose Float
+  source        String
+  sourceType    String
+  sourceUrl     String?
+  retrievedAt   DateTime
+  referenceDate DateTime?
+  confidence    Int
+  @@unique([symbol, date])
+}
+
+model MarketQuoteRevision {
+  id         String   @id
+  entityId   String
+  previous   Json
+  next       Json
+  changedAt  DateTime
+  reason     String?
+  source     String
+}
+
+model Dividend {
+  id               String    @id
+  companyId        String
+  symbol           String
+  exerciseYear     Int
+  grossAmount      Float
+  netAmount        Float
+  currency         String    @default("XOF")
+  announcementDate DateTime?
+  paymentDate      DateTime?
+  source           String
+  sourceType       String
+  sourceUrl        String?
+  retrievedAt      DateTime
+  confidence       Int
+  @@unique([symbol, exerciseYear])
+}
+
+model DividendRevision {
+  id        String   @id
+  entityId  String
+  previous  Json
+  next      Json
+  changedAt DateTime
+  reason    String?
+  source    String
+}
+
+model FinancialStatement {
+  id                String    @id
+  companyId         String
+  symbol            String
+  fiscalYear        Int
+  revenue           Float?
+  netIncome         Float?
+  eps               Float?
+  roe               Float?
+  debt              Float?
+  equity            Float?
+  cashFlow          Float?
+  sharesOutstanding Float?
+  source            String
+  sourceType        String
+  sourceUrl         String?
+  retrievedAt       DateTime
+  confidence        Int
+  @@unique([symbol, fiscalYear])
+}
+
+model FinancialRevision {
+  id        String   @id
+  entityId  String
+  previous  Json
+  next      Json
+  changedAt DateTime
+  reason    String?
+  source    String
+}
+
+model AnalysisResult {
+  id     String @id
+  symbol String
+  asOf   DateTime
+  payload Json
+  @@unique([symbol, asOf])
+}
+
+model RecommendationSnapshot {
+  id                String   @id
+  date              DateTime
+  symbol            String
+  price             Float
+  score             Int
+  confidence        Int
+  dataQuality       Int
+  intrinsicValue    Float?
+  marginOfSafety    Float?
+  status            String
+  rulesVersion      String
+  reasons           Json
+  risks             Json
+  targetPrice       Float?
+  idealEntryPrice   Float?
+  maximumEntryPrice Float?
+}
+
+model Ruleset {
+  version   String   @id
+  params    Json
+  createdAt DateTime @default(now())
+}
+
+model Alert {
+  id             String   @id
+  userId         String
+  symbol         String?
+  type           String
+  threshold      Float?
+  recommendation String?
+  active         Boolean
+  note           String?
+  createdAt      DateTime
+}
+
+model ScheduledReport {
+  id     String    @id
+  userId String
+  runAt  DateTime
+  type   String
+  email  String
+  sentAt DateTime?
+  status String
+}
+
+model UserAccount {
+  id           String   @id
+  email        String   @unique
+  name         String
+  role         String
+  passwordHash String
+  passwordSalt String
+  ruleset      Json
+  createdAt    DateTime
+}
+
+model AuthSession {
+  id        String   @id
+  userId    String
+  tokenHash String
+  expiresAt DateTime
+}
+
+model IngestionRun {
+  id              String    @id
+  source          String
+  startedAt       DateTime
+  finishedAt      DateTime?
+  recordsFetched  Int
+  recordsInserted Int
+  recordsRejected Int
+  errors          Json
+}
+
+model IndexQuote {
+  id    String   @id
+  name  String
+  date  DateTime
+  close Float
+  @@unique([name, date])
+}
+
+model RawDocument {
+  id            String   @id
+  kind          String
+  source        String
+  fetchedAt     DateTime
+  contentType   String
+  payload       String
+  parserVersion String
+}
+
+model EmailLog {
+  id     String   @id
+  sentAt DateTime
+  to     String
+  type   String
+  status String
+  error  String?
+}
+
+model PerformanceTracking {
+  id            String @id
+  symbol        String
+  snapshotDate  DateTime
+  horizonDays   Int
+  priceReturn   Float?
+  dividendReturn Float?
+  totalReturn   Float?
+  indexReturn   Float?
+}
+
+/// Version historisée de la liste officielle des actions cotées.
+model ListingSnapshot {
+  id          String   @id
+  asOf        DateTime
+  retrievedAt DateTime
+  source      String
+  sourceType  String
+  sourceUrl   String?
+  fingerprint String
+  changed     Boolean
+  itemCount   Int
+  items       ListingSnapshotItem[]
+}
+
+model ListingSnapshotItem {
+  id         String          @id
+  snapshotId String
+  symbol     String
+  name       String
+  lastClose  Float?
+  snapshot   ListingSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+  @@unique([snapshotId, symbol])
+}

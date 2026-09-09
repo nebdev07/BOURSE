@@ -1,0 +1,15 @@
+---
+description: BRVM — .docs, hexagone, ADR, anti-FILTISAC
+alwaysApply: true
+---
+
+# BRVM Investment Analyzer — Règle cœur
+
+1. Lire `.docs/` avant toute modification (`current_state`, `architecture`, `decisions`).
+2. Domaine indépendant : jamais Next, Prisma, HTTP, scraping, SMTP dans `src/modules/*/domain`.
+3. Respecter les ADR accepted. Pas de source tierce imposée au hasard.
+4. Scraping = fallback. CSV manuel toujours disponible.
+5. BUY = qualité + valorisation/MoS + confiance data. Score seul insuffisant.
+6. Échec d’une source : ne pas supprimer les anciennes données.
+7. MAJ docs dans le même chantier (`changelog`, `current_state`).
+8. Tests Vitest des formules et des règles de reco avant de clôturer une phase métier.

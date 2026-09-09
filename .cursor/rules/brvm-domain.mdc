@@ -1,0 +1,12 @@
+---
+description: BRVM — domaine financier isolé, provenance, pas de Prisma
+globs: src/modules/**/*.ts
+alwaysApply: false
+---
+
+# Domaine
+
+- Aucun import infrastructure.
+- Normaliser les montants en nombre (2606).
+- Toute donnée de marché/dividende/financier porte une provenance.
+- Les formules vivent dans le domaine et sont testées unitairement.

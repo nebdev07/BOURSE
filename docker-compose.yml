@@ -1,0 +1,14 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: brvm
+      POSTGRES_PASSWORD: brvm
+      POSTGRES_DB: brvm_analyzer
+    ports:
+      - "5432:5432"
+    volumes:
+      - brvm_pg:/var/lib/postgresql/data
+
+volumes:
+  brvm_pg:
