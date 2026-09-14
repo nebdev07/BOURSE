@@ -2,11 +2,12 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import {
   ADMIN_APP_LINKS,
-  ADMIN_SECTION_ANCHORS,
+  ADMIN_NAV,
   USER_ACCOUNT_LINKS,
   USER_APP_LINKS,
   assertAdminNotInUserChrome,
   homeAfterLogin,
+  isAdminNavActive,
   userChromeHrefs,
 } from "@/frontend/navigation/routes.ts";
 
@@ -25,12 +26,22 @@ describe("Navigation — cohérence user vs admin", () => {
     for (const link of ADMIN_APP_LINKS) {
       assert.equal(link.adminChrome, true);
       assert.equal(link.userChrome, false);
-      assert.equal(link.href, "/admin");
+      assert.ok(link.href.startsWith("/admin"));
     }
   });
 
-  it("expose les ancres backoffice attendues", () => {
-    assert.deepEqual([...ADMIN_SECTION_ANCHORS], ["users", "alerts", "ops", "data"]);
+  it("expose les routes backoffice (pas des ancres)", () => {
+    assert.deepEqual(
+      ADMIN_NAV.map((n) => n.href),
+      ["/admin", "/admin/users", "/admin/alerts", "/admin/ops", "/admin/data"],
+    );
+  });
+
+  it("marque le menu admin actif correctement", () => {
+    assert.equal(isAdminNavActive("/admin", "/admin", true), true);
+    assert.equal(isAdminNavActive("/admin/users", "/admin", true), false);
+    assert.equal(isAdminNavActive("/admin/users", "/admin/users", false), true);
+    assert.equal(isAdminNavActive("/admin/alerts", "/admin/users", false), false);
   });
 
   it("envoie l’admin vers /admin et l’utilisateur vers /dashboard après login", () => {
