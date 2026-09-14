@@ -10,6 +10,8 @@ Plateforme publique multi-comptes, admin restreint, **MySQL source de vérité**
 ## Implémenté
 
 - Auth : scrypt, cookie httpOnly/SameSite, **rate-limit** login/register/import.
+- **Backoffice** `/admin` : utilisateurs, rôles (`user`/`admin`), permissions dérivées, effacement données, suppression compte (ADR-021).
+- **Seed admin** au boot : `DEFAULT_ADMIN_EMAIL` (défaut `nebdev07@gmail.com`) — plus de promotion via `ADMIN_EMAIL`.
 - Jobs : `JOB_SECRET` obligatoire en production.
 - Exemple portefeuille admin : `ENABLE_ADMIN_PORTFOLIO_EXAMPLE` (off en prod par défaut).
 - Disclaimer légal (footer + guide).

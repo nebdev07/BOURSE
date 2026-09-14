@@ -48,6 +48,7 @@
 
 ## 2026-09-14
 
+- ADR-021 : backoffice `/admin` (rôles, effacer données, supprimer compte) ; seed admin bootstrap `nebdev07@gmail.com` au démarrage ; fin de la promotion via `ADMIN_EMAIL` / premier inscrit.
 - Packaging production : `Dockerfile` racine, `docker-entrypoint.sh` (map `DB_*` → `DATABASE_URL`, `JOB_SECRET` persisté, schéma MySQL au boot), `.dockerignore`.
 - `next.config` : ignore ESLint/TS errors pendant le build image (déploiement fiable).
 - Runbook : cible Docker + Traefik / MariaDB VPS Autopilot.

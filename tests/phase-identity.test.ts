@@ -13,7 +13,7 @@ describe("Identité publique — comptes, isolation, réglages", () => {
     const okReg = registerUser({ email: "ada@brvm.test", password: "secret-ada", name: "Ada" });
     assert.equal(okReg.ok, true);
     if (!okReg.ok) return;
-    assert.equal(okReg.value.user.role, "admin");
+    assert.equal(okReg.value.user.role, "user");
     const sessionUser = userFromToken(okReg.value.token);
     assert.equal(sessionUser?.email, "ada@brvm.test");
     const fail = loginUser("ada@brvm.test", "wrong-password");

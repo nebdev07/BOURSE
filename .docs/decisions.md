@@ -135,7 +135,7 @@
 ## ADR-019 — Admin + support alertes
 
 - **Date** : 2026-08-30
-- **Statut** : Accepted
+- **Statut** : Superseded by ADR-021 (mécanisme de promotion)
 - **Décision** : Le premier compte créé (ou `ADMIN_EMAIL`) est administrateur. L’admin voit les alertes de tous les utilisateurs pour le support. Les utilisateurs voient uniquement les leurs.
 - **Conséquence** : ADR-013 superseded. Page `/admin` : listes officielles, comptes, alertes support, import, analyse.
 
@@ -183,4 +183,13 @@
 - **Statut** : Accepted
 - **Décision** : Sur cette machine, le runtime SQL local est **MySQL 8** (Laragon) : base `db_bourse`, user `root`, mot de passe vide. Schéma dialecte dans `prisma/migrations/mysql/`. `PERSISTENCE_DRIVER=mysql` + `DATABASE_URL=mysql://root@127.0.0.1:3306/db_bourse`. PGlite reste disponible (`pglite`) ; ADR-018 n’est pas annulée mais n’est plus le défaut local.
 - **Conséquence** : file-store reste source de vérité ; SQL = hydratation + miroir. `npm run db:setup:mysql` applique le schéma.
+
+---
+
+## ADR-021 — Backoffice admin (rôles en base) + seed bootstrap
+
+- **Date** : 2026-09-14
+- **Statut** : Accepted
+- **Décision** : L’admin n’est plus lié à `ADMIN_EMAIL` ni au « premier inscrit ». Un compte bootstrap est créé au démarrage (`DEFAULT_ADMIN_EMAIL` / `DEFAULT_ADMIN_PASSWORD`, défauts documentés). La gestion utilisateurs / rôles / données se fait via `/admin` (backoffice). Rôles : `user` | `admin` ; permissions dérivées du rôle.
+- **Conséquence** : ADR-019 partiellement superseded pour le mécanisme de promotion. Page `/admin` étendue : changer rôle, effacer données, supprimer compte. API `GET/PATCH/DELETE /api/admin/users`.
 

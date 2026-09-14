@@ -7,11 +7,6 @@ import { err, ok, type Result } from "@/shared/result";
 const SESSION_DAYS = 30;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-function isAdminEmail(email: string): boolean {
-  const configured = (process.env.ADMIN_EMAIL ?? "").trim().toLowerCase();
-  return Boolean(configured) && configured === email;
-}
-
 export function toPublicUser(user: UserAccount): PublicUser {
   return { id: user.id, email: user.email, name: user.name, role: user.role };
 }
@@ -44,7 +39,8 @@ export function registerUser(input: {
       id: uid(),
       email,
       name,
-      role: isAdminEmail(email) || store.users.length === 0 ? "admin" : "user",
+      // Rôle admin uniquement via seed bootstrap ou backoffice (ADR-020).
+      role: "user",
       passwordHash: hash,
       passwordSalt: salt,
       ruleset: { ...DEFAULT_RULESET },
@@ -63,15 +59,10 @@ export function loginUser(email: string, password: string): Result<{ user: Publi
     return err("Email ou mot de passe incorrect");
   }
   const token = newSessionToken();
-  const refreshed = persist((store) => {
-    const account = store.users.find((u) => u.id === user.id);
-    if (account && isAdminEmail(account.email) && account.role !== "admin") {
-      account.role = "admin";
-    }
+  persist((store) => {
     store.sessions.push(sessionOf(user.id, token));
-    return account ?? user;
   });
-  return ok({ user: toPublicUser(refreshed), token });
+  return ok({ user: toPublicUser(user), token });
 }
 
 export function logoutUser(token: string | null): void {
@@ -88,16 +79,7 @@ export function userFromToken(token: string | null): UserAccount | null {
   const now = Date.now();
   const session = loadStore().sessions.find((s) => s.tokenHash === hashed && new Date(s.expiresAt).getTime() > now);
   if (!session) return null;
-  const user = findUserById(session.userId);
-  if (!user) return null;
-  if (isAdminEmail(user.email) && user.role !== "admin") {
-    return persist((store) => {
-      const account = store.users.find((u) => u.id === user.id);
-      if (account) account.role = "admin";
-      return account ?? user;
-    });
-  }
-  return user;
+  return findUserById(session.userId);
 }
 
 export function saveUserRuleset(userId: string, params: Partial<RulesetParams>): RulesetParams {

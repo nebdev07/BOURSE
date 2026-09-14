@@ -4,24 +4,25 @@ import { emptyStore, persist, resetStore } from "@/infrastructure/persistence/fi
 import { registerUser } from "@/modules/identity/application/auth-service.ts";
 import { createAlert, listAlerts, listAllAlertsForSupport } from "@/modules/application/workspace.ts";
 import { parseOfficialListingHtml } from "@/infrastructure/ingestion/listing-sync.ts";
+import { ensureDefaultAdmin } from "@/infrastructure/seed/default-admin.ts";
 
 describe("Admin support — alertes utilisateurs", () => {
-  it("le premier compte est admin et voit toutes les alertes", () => {
+  it("le support agrège les alertes de tous les comptes", () => {
     resetStore(emptyStore());
     persist(() => undefined);
-    const admin = registerUser({ email: "admin@brvm.test", password: "password1", name: "Admin" });
+    ensureDefaultAdmin();
     const alice = registerUser({ email: "alice@brvm.test", password: "password1", name: "Alice" });
-    assert.ok(admin.ok && alice.ok);
-    if (!admin.ok || !alice.ok) return;
-    assert.equal(admin.value.user.role, "admin");
+    const bob = registerUser({ email: "bob@brvm.test", password: "password1", name: "Bob" });
+    assert.ok(alice.ok && bob.ok);
+    if (!alice.ok || !bob.ok) return;
     assert.equal(alice.value.user.role, "user");
     createAlert(alice.value.user.id, { symbol: "SGBC", type: "PRICE_LTE", threshold: 35000 });
-    createAlert(admin.value.user.id, { symbol: "SNTS", type: "PRICE_GTE", threshold: 40000 });
+    createAlert(bob.value.user.id, { symbol: "SNTS", type: "PRICE_GTE", threshold: 40000 });
     assert.equal(listAlerts(alice.value.user.id).length, 1);
     const all = listAllAlertsForSupport();
     assert.equal(all.length, 2);
     assert.ok(all.some((a) => a.userEmail === "alice@brvm.test" && a.symbol === "SGBC"));
-    assert.ok(all.some((a) => a.userEmail === "admin@brvm.test" && a.type === "PRICE_GTE"));
+    assert.ok(all.some((a) => a.userEmail === "bob@brvm.test" && a.type === "PRICE_GTE"));
   });
 });
 
