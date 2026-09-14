@@ -1,16 +1,14 @@
 import { NextResponse } from "next/server";
-import { runTick } from "@/infrastructure/jobs/tick";
-import { ensureSeeded } from "@/infrastructure/seed/brvm-seed";
 import { requireJobSecret } from "@/app/api/_lib/jobs";
-import { syncOfficialListing } from "@/infrastructure/ingestion/listing-sync";
+import { refreshMarketPrices } from "@/infrastructure/jobs/market-refresh";
+import { sendDueReports, createLogMailer } from "@/infrastructure/email/report";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   const denied = requireJobSecret(request);
   if (denied) return denied;
-  ensureSeeded();
-  const listing = await syncOfficialListing({ allowNetwork: true });
-  const result = await runTick();
-  return NextResponse.json({ ...result, listing });
+  const market = await refreshMarketPrices({ allowNetwork: true });
+  const emails = await sendDueReports(createLogMailer());
+  return NextResponse.json({ ...market, emails });
 }

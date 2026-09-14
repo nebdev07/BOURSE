@@ -365,7 +365,7 @@ function scoreBreakdown(p: {
   else if (mos >= -10) mosScore = 2;
   else mosScore = 0;
 
-  let pf = clamp(10 - p.alignmentPenalty, 0, 10);
+  const pf = clamp(10 - p.alignmentPenalty, 0, 10);
 
   let risk = 5;
   if (p.flags.includes("DIVIDEND_TRAP")) risk -= 3;

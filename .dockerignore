@@ -1,0 +1,17 @@
+node_modules
+.next
+.git
+.docs
+.cursor
+data
+*.md
+!public/**
+.env
+.env.*
+!.env.example
+coverage
+tests
+fixtures
+docker-compose.yml
+*.log
+.DS_Store

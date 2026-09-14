@@ -337,13 +337,20 @@ function migrateTickerAliases(store: AppStore): boolean {
 }
 
 function upsertMissing(store: AppStore, asOf: string): number {
-  const have = new Set(store.companies.map((c) => c.symbol));
+  const have = new Map(store.companies.map((c) => [c.symbol, c]));
   let added = 0;
   for (const item of BRVM_LISTED) {
-    if (have.has(item.symbol)) continue;
+    const existing = have.get(item.symbol);
+    if (existing) {
+      // Toujours coller au libellé officiel du seed (aligné BRVM)
+      existing.name = item.name;
+      existing.sector = item.sector || existing.sector;
+      existing.country = item.country || existing.country;
+      continue;
+    }
     const co = company(item);
     store.companies.push(co);
-    have.add(item.symbol);
+    have.set(item.symbol, co);
     added += 1;
     if (CORE_RESEARCH_SYMBOLS.has(item.symbol)) continue;
     attachSparseHistory(store, item, co, asOf);

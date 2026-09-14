@@ -71,5 +71,6 @@ SOURCE → FETCH → PARSE → NORMALIZE → VALIDATE → DEDUPLICATE → STORE 
 
 ## 7. Scheduler
 
-Port `SchedulerPort`. En production : cron OS / job cloud qui appelle `POST /api/jobs/tick`.  
-Interdit de s’appuyer sur `setInterval` comme mécanisme de prod.
+- **Local / process app** : `instrumentation.ts` appelle `POST /api/jobs/tick` toutes les **1 h** (`MARKET_REFRESH_MS`, header `x-job-secret`).
+- **Production recommandée** : cron OS / job cloud sur le même endpoint (redondance si l’app redémarre).
+- Le tick récupère la page officielle BRVM, met à jour liste + cours du jour, puis recalcule analyses / alertes.

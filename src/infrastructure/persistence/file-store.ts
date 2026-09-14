@@ -1,6 +1,5 @@
-import { randomUUID } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
+import { dirname, join } from "path";
 import type {
   Alert,
   AnalysisResult,
@@ -12,6 +11,8 @@ import type {
   FinancialStatement,
   IngestionRun,
   MarketQuote,
+  PortfolioHolding,
+  PortfolioTransaction,
   RawDocument,
   RecommendationSnapshot,
   ScheduledReport,
@@ -19,6 +20,10 @@ import type {
   UserAccount,
 } from "@/modules/shared-kernel/types";
 import { DEFAULT_RULESET, type RulesetParams } from "@/modules/recommendation/domain/ruleset";
+
+function randomUUID(): string {
+  return globalThis.crypto.randomUUID();
+}
 
 export interface AppStore {
   companies: Company[];
@@ -35,6 +40,8 @@ export interface AppStore {
   analyses: AnalysisResult[];
   recommendations: RecommendationSnapshot[];
   alerts: Alert[];
+  holdings: PortfolioHolding[];
+  transactions: PortfolioTransaction[];
   scheduledReports: ScheduledReport[];
   emailLogs: Array<{ id: string; sentAt: string; to: string; type: string; status: string; error?: string }>;
   performance: PerformanceTracking[];
@@ -106,6 +113,8 @@ export function emptyStore(): AppStore {
     analyses: [],
     recommendations: [],
     alerts: [],
+    holdings: [],
+    transactions: [],
     scheduledReports: [],
     emailLogs: [],
     performance: [],
@@ -139,6 +148,8 @@ function ensureShape(store: AppStore): AppStore {
   if (!store.users) store.users = [];
   if (!store.sessions) store.sessions = [];
   if (!store.alerts) store.alerts = [];
+  if (!store.holdings) store.holdings = [];
+  if (!store.transactions) store.transactions = [];
   if (!store.scheduledReports) store.scheduledReports = [];
   return store;
 }
@@ -162,12 +173,47 @@ export function persist<T>(mutator: (store: AppStore) => T): T {
   if (process.env.BRVM_DISABLE_PG === "1" || process.env.PERSISTENCE_DRIVER === "file") {
     return result;
   }
-  void import("@/infrastructure/persistence/postgres")
-    .then((mod) => (mod.postgresEnabled() ? mod.syncPlatformToPostgres(store) : undefined))
-    .catch((error) => {
-      console.error("[postgres] sync échouée", error);
-    });
+  scheduleSqlSync(store);
   return result;
+}
+
+let syncTimer: ReturnType<typeof setTimeout> | null = null;
+let syncing = false;
+let pendingSync: AppStore | null = null;
+
+/** Debounce + file d'attente : évite les sync MySQL lourdes à chaque clic. */
+function scheduleSqlSync(store: AppStore): void {
+  pendingSync = store;
+  if (syncTimer) clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => {
+    void flushSqlSync();
+  }, 1200);
+}
+
+async function flushSqlSync(): Promise<void> {
+  if (syncing) return;
+  const snapshot = pendingSync;
+  pendingSync = null;
+  if (!snapshot) return;
+  syncing = true;
+  try {
+    const mod = await import("@/infrastructure/persistence/postgres");
+    if (mod.postgresEnabled()) {
+      const driver = (process.env.PERSISTENCE_DRIVER ?? "").trim().toLowerCase();
+      // MySQL = production source of truth: sync companies + market on every debounced persist.
+      if (driver === "mysql") {
+        await mod.syncPlatformToPostgres(snapshot, { includeCompanies: true, includeMarket: true });
+      } else {
+        // PGlite / other: skip re-syncing the full company universe on every UI mutation.
+        await mod.syncPlatformToPostgres(snapshot, { includeCompanies: false, includeMarket: true });
+      }
+    }
+  } catch (error) {
+    console.error("[postgres] sync échouée", error);
+  } finally {
+    syncing = false;
+    if (pendingSync) scheduleSqlSync(pendingSync);
+  }
 }
 
 export function uid(): string {

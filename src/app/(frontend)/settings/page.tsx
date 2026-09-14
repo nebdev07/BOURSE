@@ -1,8 +1,11 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { DEFAULT_RULESET } from "@/modules/recommendation/domain/ruleset";
+import { Tip } from "@/frontend/components/Tip";
+import { GHelp } from "@/frontend/components/GTerm";
 import { useI18n } from "@/frontend/i18n/provider";
 
 export default function SettingsPage() {
@@ -53,7 +56,7 @@ export default function SettingsPage() {
     setMessage(t.settings.emailOk);
   }
 
-  const field = (key: keyof typeof DEFAULT_RULESET, label: string) => (
+  const field = (key: keyof typeof DEFAULT_RULESET, label: ReactNode) => (
     <label key={key} className="text-sm">
       {label}
       <input
@@ -75,18 +78,19 @@ export default function SettingsPage() {
         <h2 className="mt-1 font-serif text-3xl">{t.settings.title}</h2>
         <p className="mt-2 text-sm text-muted">{t.settings.lead}</p>
       </div>
+      <Tip title={t.tips.label}>{t.tips.settings}</Tip>
       {message && <p className="card border-brand-400/30 p-4 text-sm text-brand-500">{message}</p>}
 
       <section className="card p-5">
         <h3 className="font-serif text-xl">{t.settings.thresholds}</h3>
         <form onSubmit={saveRules} className="mt-4 grid gap-4 md:grid-cols-3">
-          {field("minimumBuyScore", t.settings.minBuy)}
-          {field("minimumMarginOfSafety", t.settings.minMos)}
-          {field("minimumConfidence", t.settings.minConf)}
+          {field("minimumBuyScore", <span className="inline-flex items-center gap-1">{t.settings.minBuy}<GHelp id="score" /></span>)}
+          {field("minimumMarginOfSafety", <span className="inline-flex items-center gap-1">{t.settings.minMos}<GHelp id="mos" /></span>)}
+          {field("minimumConfidence", <span className="inline-flex items-center gap-1">{t.settings.minConf}<GHelp id="confidence" /></span>)}
           {field("minimumDividendScore", t.settings.minDiv)}
           {field("minimumGrowthScore", t.settings.minGrowth)}
-          {field("maximumPER", t.settings.maxPer)}
-          {field("minimumROE", t.settings.minRoe)}
+          {field("maximumPER", <span className="inline-flex items-center gap-1">{t.settings.maxPer}<GHelp id="per" /></span>)}
+          {field("minimumROE", <span className="inline-flex items-center gap-1">{t.settings.minRoe}<GHelp id="roe" /></span>)}
           <div className="md:col-span-3">
             <button className="btn-primary">{t.settings.save}</button>
           </div>

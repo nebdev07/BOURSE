@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { StatusBadge } from "@/frontend/components/StatusBadge";
+import { Tip } from "@/frontend/components/Tip";
 import { xof } from "@/frontend/lib/format";
 import { latestRecommendations, listCompanies } from "@/modules/application/catalog";
 import { ensureSeeded } from "@/infrastructure/seed/brvm-seed";
@@ -18,6 +19,7 @@ export default async function StocksPage() {
         <h2 className="mt-1 font-serif text-3xl">{t.stocks.title}</h2>
         <p className="mt-2 text-sm text-muted">{t.stocks.count(companies.length)}</p>
       </div>
+      <Tip title={t.tips.label}>{t.tips.stocks}</Tip>
       <div className="card overflow-hidden">
         <div className="table-wrap">
           <table className="w-full min-w-[720px] text-sm">

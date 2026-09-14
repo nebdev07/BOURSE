@@ -175,3 +175,12 @@
 - **Décision** : Catalogue = séance officielle BRVM du 2026-08-27 (`brvm.org/fr/cours-actions/0`) : **47** titres. Ticker officiel SGBC (pas SGCI). BBGC non cotée (introduction à venir) : hors univers. Historique riche pour 5 titres de recherche ; les autres ont une série seed à qualité data limitée (pas de BUY sur fausse complétude).
 - **Conséquence** : `ensureSeeded` ajoute les titres manquants sans effacer les comptes.
 
+---
+
+## ADR-020 — MySQL local (Laragon) comme runtime SQL
+
+- **Date** : 2026-09-11
+- **Statut** : Accepted
+- **Décision** : Sur cette machine, le runtime SQL local est **MySQL 8** (Laragon) : base `db_bourse`, user `root`, mot de passe vide. Schéma dialecte dans `prisma/migrations/mysql/`. `PERSISTENCE_DRIVER=mysql` + `DATABASE_URL=mysql://root@127.0.0.1:3306/db_bourse`. PGlite reste disponible (`pglite`) ; ADR-018 n’est pas annulée mais n’est plus le défaut local.
+- **Conséquence** : file-store reste source de vérité ; SQL = hydratation + miroir. `npm run db:setup:mysql` applique le schéma.
+

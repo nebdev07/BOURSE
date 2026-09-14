@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { StatusBadge } from "@/frontend/components/StatusBadge";
+import { Tip } from "@/frontend/components/Tip";
 import { useI18n } from "@/frontend/i18n/provider";
+import { xof } from "@/frontend/lib/format";
 
 type AlertRow = {
   id: string;
@@ -15,25 +17,34 @@ type AlertRow = {
   note: string | null;
 };
 
+type CompanyOpt = { symbol: string; name: string; price: number | null };
+
 export default function AlertsPage() {
   const router = useRouter();
   const { t } = useI18n();
   const [ready, setReady] = useState(false);
   const [alerts, setAlerts] = useState<AlertRow[]>([]);
   const [hits, setHits] = useState<Array<{ message: string }>>([]);
-  const [symbol, setSymbol] = useState("SGBC");
+  const [companies, setCompanies] = useState<CompanyOpt[]>([]);
+  const [symbol, setSymbol] = useState("");
   const [type, setType] = useState("PRICE_LTE");
-  const [threshold, setThreshold] = useState("35000");
+  const [threshold, setThreshold] = useState("");
 
   async function refresh() {
-    const res = await fetch("/api/alerts");
-    if (res.status === 401) {
+    const [aRes, cRes] = await Promise.all([fetch("/api/alerts"), fetch("/api/companies")]);
+    if (aRes.status === 401) {
       router.replace("/login");
       return;
     }
-    const json = await res.json();
+    const json = await aRes.json();
     setAlerts(json.alerts ?? []);
     setHits(json.hits ?? []);
+    const list = ((await cRes.json()).companies ?? []) as CompanyOpt[];
+    setCompanies(list);
+    if (!symbol && list[0]) {
+      setSymbol(list[0].symbol);
+      if (list[0].price != null) setThreshold(String(Math.round(list[0].price)));
+    }
     setReady(true);
   }
 
@@ -41,8 +52,17 @@ export default function AlertsPage() {
     void refresh();
   }, []);
 
+  function onPickSymbol(next: string) {
+    setSymbol(next);
+    const c = companies.find((x) => x.symbol === next);
+    if (c?.price != null && (type === "PRICE_LTE" || type === "PRICE_GTE")) {
+      setThreshold(String(Math.round(c.price)));
+    }
+  }
+
   async function create(e: React.FormEvent) {
     e.preventDefault();
+    if (!symbol) return;
     await fetch("/api/alerts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -63,6 +83,8 @@ export default function AlertsPage() {
 
   if (!ready) return <p className="text-muted">{t.alerts.loading}</p>;
 
+  const selected = companies.find((c) => c.symbol === symbol);
+
   return (
     <div className="space-y-6">
       <div>
@@ -70,10 +92,29 @@ export default function AlertsPage() {
         <h2 className="mt-1 font-serif text-3xl">{t.alerts.title}</h2>
         <p className="mt-2 text-sm text-muted">{t.alerts.lead}</p>
       </div>
+
+      <Tip title={t.tips.label}>{t.tips.alerts}</Tip>
+
       <form onSubmit={create} className="card flex flex-wrap items-end gap-3 p-5">
-        <label className="text-sm">
+        <label className="min-w-[16rem] flex-1 text-sm">
           {t.alerts.symbol}
-          <input className="field" value={symbol} onChange={(e) => setSymbol(e.target.value)} />
+          <select className="field" value={symbol} onChange={(e) => onPickSymbol(e.target.value)} required>
+            <option value="" disabled>
+              {t.alerts.pickStock}
+            </option>
+            {companies.map((c) => (
+              <option key={c.symbol} value={c.symbol}>
+                {c.symbol} — {c.name}
+                {c.price != null ? ` (${xof(c.price)})` : ""}
+              </option>
+            ))}
+          </select>
+          {selected && (
+            <span className="mt-1 block text-xs text-muted">
+              {selected.name}
+              {selected.price != null ? ` · cours actuel ${xof(selected.price)}` : ""}
+            </span>
+          )}
         </label>
         <label className="text-sm">
           {t.alerts.type}
@@ -87,11 +128,12 @@ export default function AlertsPage() {
         {type !== "RECOMMENDATION_EQ" && (
           <label className="text-sm">
             {t.alerts.threshold}
-            <input className="field" value={threshold} onChange={(e) => setThreshold(e.target.value)} />
+            <input className="field" value={threshold} onChange={(e) => setThreshold(e.target.value)} required />
           </label>
         )}
         <button className="btn-primary">{t.alerts.subscribe}</button>
       </form>
+
       {hits.length > 0 && (
         <div className="card border-brand-400/30 p-5 text-sm">
           <p className="font-semibold text-brand-500">{t.alerts.triggered}</p>
@@ -102,6 +144,7 @@ export default function AlertsPage() {
           </ul>
         </div>
       )}
+
       <div className="card overflow-hidden">
         <div className="table-wrap">
           <table className="w-full min-w-[480px] text-sm">
@@ -118,7 +161,7 @@ export default function AlertsPage() {
                 <tr key={a.id} className="border-t border-white/5">
                   <td className="px-5 py-3">{a.symbol ?? t.alerts.all}</td>
                   <td className="px-3 py-3">
-                    {a.type} {a.threshold ?? a.recommendation ?? ""} {a.note ? `— ${a.note}` : ""}
+                    {a.type} {a.threshold ?? a.recommendation ?? ""}
                   </td>
                   <td className="px-3 py-3">{a.active ? <StatusBadge status="BUY" /> : t.alerts.off}</td>
                   <td className="px-3 py-3">

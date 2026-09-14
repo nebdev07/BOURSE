@@ -2,6 +2,7 @@
 
 import { statusLabel } from "@/frontend/i18n/dictionary";
 import { useI18n } from "@/frontend/i18n/provider";
+import { InfoBubble } from "@/frontend/components/InfoBubble";
 
 const TONE: Record<string, string> = {
   BUY: "bg-emerald-950/70 text-emerald-300 border-emerald-800",
@@ -11,11 +12,33 @@ const TONE: Record<string, string> = {
   AVOID: "bg-rose-950/60 text-rose-300 border-rose-800",
 };
 
+const GLOSSARY_KEY: Record<string, "buy" | "accumulate" | "watch" | "wait" | "avoid"> = {
+  BUY: "buy",
+  ACCUMULATE: "accumulate",
+  WATCH: "watch",
+  WAIT: "wait",
+  AVOID: "avoid",
+};
+
 export function StatusBadge({ status }: { status: string }) {
-  const { locale } = useI18n();
+  const { locale, t } = useI18n();
+  const key = GLOSSARY_KEY[status];
+  const tip = key ? t.glossary[key] : null;
   return (
-    <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-semibold tracking-wide ${TONE[status] ?? "bg-brand-200"}`}>
-      {statusLabel(locale, status)}
+    <span className="inline-flex items-center gap-1">
+      <span
+        className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-semibold tracking-wide ${TONE[status] ?? "bg-brand-200"}`}
+      >
+        {statusLabel(locale, status)}
+      </span>
+      {tip && (
+        <InfoBubble
+          term={tip.label}
+          beginner={tip.beginner}
+          expert={tip.expert}
+          levelLabels={{ beginner: t.glossary.beginner, expert: t.glossary.expert }}
+        />
+      )}
     </span>
   );
 }

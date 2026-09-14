@@ -5,7 +5,7 @@ import {
   postgresEnabled,
   type ListingItem,
 } from "@/infrastructure/persistence/postgres";
-import { BRVM_LISTED, BRVM_LISTING_AS_OF, BRVM_LISTING_SOURCE } from "@/infrastructure/seed/brvm-listed-companies";
+import { BRVM_LISTED, BRVM_LISTING_AS_OF, BRVM_LISTING_SOURCE, normalizeOfficialName } from "@/infrastructure/seed/brvm-listed-companies";
 
 const OFFICIAL_LIST_URL = "https://www.brvm.org/fr/cours-actions/0";
 
@@ -27,7 +27,7 @@ export function parseOfficialListingHtml(html: string): ParsedListing[] {
     if (cells.length < 2) continue;
     const symbol = (cells[0] ?? "").toUpperCase().replace(/[^A-Z0-9]/g, "");
     if (!/^[A-Z]{3,6}$/.test(symbol) || symbol === "SYMBOLE") continue;
-    const name = cells[1] ?? symbol;
+    const name = normalizeOfficialName(cells[1] ?? symbol);
     const closeCell = cells[5] ?? cells[3] ?? cells[2];
     const lastClose = parseFrNumber(closeCell);
     out.set(symbol, { symbol, name, lastClose });

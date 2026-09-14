@@ -27,7 +27,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     { href: "/stocks", label: t.nav.stocks },
     { href: "/recommendations", label: t.nav.recos },
     { href: "/alerts", label: t.nav.alerts, auth: true },
+    { href: "/portfolio", label: t.nav.portfolio, auth: true },
     { href: "/settings", label: t.nav.settings, auth: true },
+    { href: "/guide", label: t.nav.guide },
   ];
 
   async function logout() {
@@ -103,6 +105,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {open && <nav className="flex flex-col gap-1 border-t border-white/10 px-4 py-3 lg:hidden">{navItems}</nav>}
       </header>
       <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">{children}</main>
+      <footer className="border-t border-white/10 bg-brand-100/80">
+        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
+          <p className="text-center text-xs leading-relaxed text-muted">{t.legal.disclaimerShort}</p>
+        </div>
+      </footer>
     </div>
   );
 }

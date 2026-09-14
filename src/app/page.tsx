@@ -4,12 +4,13 @@ import { xof } from "@/frontend/lib/format";
 import { copy } from "@/frontend/i18n/locale";
 import { LanguageSwitcher } from "@/frontend/i18n/LanguageSwitcher";
 import { StatusBadge } from "@/frontend/components/StatusBadge";
+import { currentUser } from "@/app/api/_lib/session";
 
 export const dynamic = "force-dynamic";
 
 export default async function LandingPage() {
   const t = await copy();
-  const data = await getDashboard();
+  const [data, user] = await Promise.all([getDashboard(), currentUser()]);
   return (
     <div className="min-h-screen bg-brand-50">
       <header className="border-b border-white/10 bg-brand-100/80">
@@ -20,12 +21,26 @@ export default async function LandingPage() {
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <LanguageSwitcher />
-            <Link href="/login" className="rounded-full px-4 py-2 text-sm text-muted">
-              {t.nav.login}
-            </Link>
-            <Link href="/signup" className="btn-primary">
-              {t.nav.signup}
-            </Link>
+            {user ? (
+              <>
+                <span className="hidden max-w-[12rem] truncate text-xs text-muted sm:inline">{user.email}</span>
+                <Link href="/dashboard" className="rounded-full px-4 py-2 text-sm text-muted">
+                  {t.nav.dashboard}
+                </Link>
+                <Link href="/portfolio" className="btn-primary">
+                  {t.nav.portfolio}
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/login" className="rounded-full px-4 py-2 text-sm text-muted">
+                  {t.nav.login}
+                </Link>
+                <Link href="/signup" className="btn-primary">
+                  {t.nav.signup}
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -36,11 +51,36 @@ export default async function LandingPage() {
         </h1>
         <p className="mt-5 max-w-2xl text-lg text-muted">{t.landing.lead}</p>
         <div className="mt-8 flex flex-wrap gap-3">
-          <Link href="/signup" className="btn-primary px-6 py-3">
-            {t.landing.ctaAccount}
-          </Link>
-          <Link href="/dashboard" className="rounded-full border border-white/15 bg-brand-100 px-6 py-3 text-sm font-semibold text-ink">
-            {t.landing.ctaMarket}
+          {user ? (
+            <>
+              <Link href="/portfolio" className="btn-primary px-6 py-3">
+                {t.landing.ctaPortfolio}
+              </Link>
+              <Link
+                href="/dashboard"
+                className="rounded-full border border-white/15 bg-brand-100 px-6 py-3 text-sm font-semibold text-ink"
+              >
+                {t.landing.ctaMarket}
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link href="/signup" className="btn-primary px-6 py-3">
+                {t.landing.ctaAccount}
+              </Link>
+              <Link
+                href="/dashboard"
+                className="rounded-full border border-white/15 bg-brand-100 px-6 py-3 text-sm font-semibold text-ink"
+              >
+                {t.landing.ctaMarket}
+              </Link>
+            </>
+          )}
+          <Link
+            href="/guide"
+            className="rounded-full border border-white/15 bg-transparent px-6 py-3 text-sm font-semibold text-brand-500"
+          >
+            {t.nav.guide}
           </Link>
         </div>
         <div className="mt-14 grid gap-4 sm:grid-cols-2 md:grid-cols-4">

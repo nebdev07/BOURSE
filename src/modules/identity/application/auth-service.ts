@@ -63,10 +63,15 @@ export function loginUser(email: string, password: string): Result<{ user: Publi
     return err("Email ou mot de passe incorrect");
   }
   const token = newSessionToken();
-  persist((store) => {
+  const refreshed = persist((store) => {
+    const account = store.users.find((u) => u.id === user.id);
+    if (account && isAdminEmail(account.email) && account.role !== "admin") {
+      account.role = "admin";
+    }
     store.sessions.push(sessionOf(user.id, token));
+    return account ?? user;
   });
-  return ok({ user: toPublicUser(user), token });
+  return ok({ user: toPublicUser(refreshed), token });
 }
 
 export function logoutUser(token: string | null): void {
@@ -83,7 +88,16 @@ export function userFromToken(token: string | null): UserAccount | null {
   const now = Date.now();
   const session = loadStore().sessions.find((s) => s.tokenHash === hashed && new Date(s.expiresAt).getTime() > now);
   if (!session) return null;
-  return findUserById(session.userId);
+  const user = findUserById(session.userId);
+  if (!user) return null;
+  if (isAdminEmail(user.email) && user.role !== "admin") {
+    return persist((store) => {
+      const account = store.users.find((u) => u.id === user.id);
+      if (account) account.role = "admin";
+      return account ?? user;
+    });
+  }
+  return user;
 }
 
 export function saveUserRuleset(userId: string, params: Partial<RulesetParams>): RulesetParams {

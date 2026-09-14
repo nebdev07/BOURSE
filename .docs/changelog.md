@@ -27,3 +27,36 @@
 - Alerte `PRICE_GTE` (seuil de hausse).
 - ADR-018, ADR-019.
 
+## 2026-09-10
+
+- Guide utilisateur : retrait des sections internes (fréquence des cours, rôle admin).
+- Rafraîchissement automatique des cours **toutes les heures** (`instrumentation` + `MARKET_REFRESH_MS`).
+- Import cours : les corrections du jour (même date) sont bien comptées (`updated`) pour le job horaire.
+- Landing respectueuse de la session (CTAs connectés vs anonymes).
+- Portefeuille personnel `/portfolio` : positions, poids, P&L, contribution journalière, conseil de renforcement + raisons ; table `portfolio_holding`.
+- Import portefeuille CSV : téléchargement modèle + exemple (acquisitions extrait courtier), upload UI ; parseur format plateforme et extrait Titre/Acquisitions/Crédit.
+- Modèles Excel (.xlsx) professionnels colorés (onglets Accueil / Positions / Guide) ; import .xlsx ou .csv.
+- Portefeuille basé sur l’historique d’opérations (FIFO) : lots restants, cessions, P&L réalisé ; exemple = relevé complet (achats progressifs).
+- Modèle d’import **vierge** pour tous les utilisateurs ; historique perso n’entre pas dans l’analyse marché.
+- Guide utilisateur enrichi (portefeuille, import, champ note, analyse vs portefeuille) ; roadmap 2026-09-10 recalée.
+
+## 2026-09-11
+
+- Import portefeuille : modèle **vierge** pour tous ; modèle **prérempli** (données admin / extrait courtier) téléchargeable uniquement si `role=admin` (`kind=exemple`).
+- Persistence **MySQL** (`db_bourse`, Laragon) : schéma `prisma/migrations/mysql/`, driver `mysql2`, `npm run db:setup:mysql` ; file-store reste source de vérité, SQL = miroir/hydratation.
+- Admin : `ADMIN_EMAIL` promu aussi au login / lecture session (pas seulement à l’inscription).
+
+## 2026-09-14
+
+- Packaging production : `Dockerfile` racine, `docker-entrypoint.sh` (map `DB_*` → `DATABASE_URL`, `JOB_SECRET` persisté, schéma MySQL au boot), `.dockerignore`.
+- `next.config` : ignore ESLint/TS errors pendant le build image (déploiement fiable).
+- Runbook : cible Docker + Traefik / MariaDB VPS Autopilot.
+
+## 2026-09-13
+
+- Info-bulles pédagogiques (Débutant / Expert) sur dashboard, recommandations, fiches, portefeuille, réglages et pastilles de statut.
+- Perf : sync MySQL debounced + exclusion du miroir `company` sur le chemin `persist` hot.
+- Noms titres alignés sur la cote officielle BRVM (`COTE D'IVOIRE`, etc.) ; seed + sync listing + info-bulle « Nom officiel ».
+
+
+

@@ -186,6 +186,32 @@ export interface Alert {
   createdAt: string;
 }
 
+/** Position agrégée (vue) — reconstruite depuis les transactions. */
+export interface PortfolioHolding {
+  id: string;
+  userId: string;
+  symbol: string;
+  quantity: number;
+  avgCost: number;
+  purchasedAt: string | null;
+  note: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Opération d’historique (achat ou cession). Source de vérité du portefeuille. */
+export interface PortfolioTransaction {
+  id: string;
+  userId: string;
+  symbol: string;
+  side: "BUY" | "SELL";
+  quantity: number;
+  unitPrice: number;
+  tradedAt: string | null;
+  note: string | null;
+  createdAt: string;
+}
+
 export interface ScheduledReport {
   id: string;
   userId: string;

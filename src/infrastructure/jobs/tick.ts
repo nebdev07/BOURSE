@@ -2,8 +2,8 @@ import { importDividendsCsv, importFinancialsCsv, importQuotesCsv, runAnalysis }
 import { sendDueReports, createLogMailer } from "@/infrastructure/email/report";
 import { persist } from "@/infrastructure/persistence/file-store";
 import { parseBrvmMarketHtml } from "@/infrastructure/data-providers/scraping/engine";
-import { readFileSync, existsSync } from "node:fs";
-import { join } from "node:path";
+import { readFileSync, existsSync } from "fs";
+import { join } from "path";
 
 export async function runTick(): Promise<{ analyzed: number; emails: number }> {
   const analyzed = runAnalysis().length;

@@ -145,6 +145,7 @@ export function importQuotesCsv(text: string, source = "MANUAL") {
   return persist((store) => {
     const known = new Set(store.companies.map((c) => c.symbol));
     let inserted = 0;
+    let updated = 0;
     const errors: string[] = [];
     const runId = uid();
     store.rawDocuments.push({
@@ -179,18 +180,27 @@ export function importQuotesCsv(text: string, source = "MANUAL") {
           referenceDate: row.date,
         }),
       };
-      if (existing && existing.close !== next.close) {
-        store.quoteRevisions.push({
-          id: uid(),
-          entityId: existing.id,
-          previous: existing,
-          next,
-          changedAt: new Date().toISOString(),
-          reason: "correction source",
-          source,
-        });
-        Object.assign(existing, next, { id: existing.id });
-      } else if (!existing) {
+      if (existing) {
+        const changed =
+          existing.close !== next.close ||
+          existing.open !== next.open ||
+          existing.high !== next.high ||
+          existing.low !== next.low ||
+          existing.volume !== next.volume;
+        if (changed) {
+          store.quoteRevisions.push({
+            id: uid(),
+            entityId: existing.id,
+            previous: { ...existing },
+            next,
+            changedAt: new Date().toISOString(),
+            reason: "correction source",
+            source,
+          });
+          Object.assign(existing, next, { id: existing.id });
+          updated += 1;
+        }
+      } else {
         store.quotes.push(next);
         inserted += 1;
       }
@@ -201,13 +211,13 @@ export function importQuotesCsv(text: string, source = "MANUAL") {
       startedAt: new Date().toISOString(),
       finishedAt: new Date().toISOString(),
       recordsFetched: parsed.value.rows.length,
-      recordsInserted: inserted,
+      recordsInserted: inserted + updated,
       recordsRejected: parsed.value.rejected.length + errors.length,
       errors,
     });
     const src = store.sources.find((s) => s.type === "MANUAL");
     if (src) src.lastSuccessfulSync = new Date().toISOString();
-    return { inserted, rejected: parsed.value.rejected.length, errors };
+    return { inserted, updated, rejected: parsed.value.rejected.length, errors };
   });
 }
 

@@ -1,24 +1,34 @@
 # État actuel — BRVM Investment Analyzer
 
 > Distinguer spécifié vs implémenté.  
-> Dernière mise à jour : 2026-08-30
+> Dernière mise à jour : 2026-09-14
 
 ## Spécifié
 
-Plateforme publique multi-comptes, **admin support**, PostgreSQL, liste officielle historisée, thème sombre, FR/EN, PWA, 47 actions BRVM.
+Plateforme publique multi-comptes, admin restreint, **MySQL source de vérité**, alertes, guide, refresh horaire, portefeuille, prêt production (sécurité + ops).
 
 ## Implémenté
 
-- Moteur d’analyse + recommandations officielles.
-- Inscription / connexion. **Premier compte = admin** (ou `ADMIN_EMAIL`).
-- Alertes personnelles (prix ≤, prix ≥ hausse, score, reco). L’admin voit toutes les alertes pour le support.
-- Page `/admin` : comptes, alertes support, historique des listes, import, analyse.
-- Job `tick` : re-lit la liste officielle BRVM, enregistre un snapshot, met à jour le catalogue (sans effacer l’historique).
-- Persistance SQL : PGlite (PostgreSQL WASM) — `postgres.exe` bloqué sur cette machine.
-- Tests métier + isolation + support admin + parseur de liste.
+- Auth : scrypt, cookie httpOnly/SameSite, **rate-limit** login/register/import.
+- Jobs : `JOB_SECRET` obligatoire en production.
+- Exemple portefeuille admin : `ENABLE_ADMIN_PORTFOLIO_EXAMPLE` (off en prod par défaut).
+- Disclaimer légal (footer + guide).
+- MySQL : hydratation + sync marché (quotes, divs, fins, analyses, recos) + plateforme.
+- Migration : `npm run db:migrate-from-store`.
+- Health : `GET /api/health`.
+- Runbook : `.docs/runbook-production.md` ; backups `scripts/backup-mysql.sh`.
+- **Docker prod** : `Dockerfile` + entrypoint (`DB_*`→`DATABASE_URL`, schéma MySQL au boot, volume `/app/data`).
+- Portefeuille, info-bulles, noms officiels BRVM, etc. (chantiers antérieurs).
 
-## Runtime
+## Runtime local
 
-- App : `PERSISTENCE_DRIVER=pglite` → `.postgres/pglite`
-- Tests : fichier `data/test-store.json`
-- Dev : `npx next dev -p 3000`
+- `PERSISTENCE_DRIVER=mysql`
+- `DATABASE_URL=mysql://root@127.0.0.1:3306/db_bourse` (Laragon)
+- `ENABLE_ADMIN_PORTFOLIO_EXAMPLE=1` (dev)
+- Prod : user `brvm_app`, `ENABLE_ADMIN_PORTFOLIO_EXAMPLE=0`, `NODE_ENV=production`, `npm run build && npm start` **ou** image Docker.
+
+## Déploiement VPS (Autopilot)
+
+- Image construite depuis le Dockerfile du dépôt (plus de scaffold Next requis).
+- Env : `app.env` (`JOB_SECRET`) + `db.env` (`DATABASE_URL` / `DB_*`) injectés par le rôle `deploy-app`.
+- Hostname public typique : `my-bourse.apps.nebdev.org` (port interne **3000**).

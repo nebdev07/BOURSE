@@ -1,7 +1,10 @@
+import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
 import { DividendChart, PriceChart } from "@/frontend/components/Charts";
 import { ScoreBreakdownPanel } from "@/frontend/components/ScoreBreakdownPanel";
 import { StatusBadge } from "@/frontend/components/StatusBadge";
+import { TermLabel } from "@/frontend/components/InfoBubble";
+import { Tip } from "@/frontend/components/Tip";
 import { frDate, num, pct, xof } from "@/frontend/lib/format";
 import {
   dividendsOf,
@@ -19,6 +22,8 @@ import { statusLabel } from "@/frontend/i18n/dictionary";
 
 export default async function StockPage({ params }: { params: Promise<{ symbol: string }> }) {
   const t = await copy();
+  const g = t.glossary;
+  const levels = { beginner: g.beginner, expert: g.expert };
   const locale = await readLocale();
   ensureSeeded();
   const { symbol } = await params;
@@ -42,6 +47,13 @@ export default async function StockPage({ params }: { params: Promise<{ symbol: 
   const lastDiv = divs.at(-1);
   const lastFin = fins.at(-1);
 
+  const metricCards = [
+    { entry: g.score, value: analysis ? `${analysis.investmentScore}/100` : "—" },
+    { entry: g.confidence, value: analysis ? `${analysis.confidenceScore}/100` : "—" },
+    { entry: g.dataQuality, value: analysis ? `${analysis.dataQualityScore}/100` : "—" },
+    { entry: g.mos, value: pct(analysis?.marginOfSafety) },
+  ];
+
   return (
     <div className="space-y-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
@@ -56,16 +68,15 @@ export default async function StockPage({ params }: { params: Promise<{ symbol: 
         </div>
       </div>
 
+      <Tip title={t.tips.label}>{t.tips.stocks}</Tip>
+
       <div className="grid gap-4 md:grid-cols-4">
-        {[
-          [t.stock.score, analysis ? `${analysis.investmentScore}/100` : "—"],
-          [t.stock.confidence, analysis ? `${analysis.confidenceScore}/100` : "—"],
-          [t.stock.dataQuality, analysis ? `${analysis.dataQualityScore}/100` : "—"],
-          [t.stock.mos, pct(analysis?.marginOfSafety)],
-        ].map(([k, v]) => (
-          <div key={k} className="card px-4 py-4">
-            <p className="text-[11px] uppercase tracking-wider text-muted">{k}</p>
-            <p className="mt-1 font-serif text-2xl num">{v}</p>
+        {metricCards.map(({ entry, value }) => (
+          <div key={entry.label} className="card px-4 py-4">
+            <p className="text-[11px] uppercase tracking-wider text-muted">
+              <TermLabel entry={entry} levelLabels={levels} />
+            </p>
+            <p className="mt-1 font-serif text-2xl num">{value}</p>
           </div>
         ))}
       </div>
@@ -103,16 +114,16 @@ export default async function StockPage({ params }: { params: Promise<{ symbol: 
         </div>
         <div className="card p-5 space-y-3 text-sm">
           <h3 className="font-serif text-lg">{t.stock.fundamentals}</h3>
-          <Row label={t.stock.eps} value={num(analysis?.eps, 2)} source={lastFin?.provenance.source} />
-          <Row label={t.stock.per} value={num(analysis?.per, 2)} />
-          <Row label={t.stock.roe} value={pct(analysis?.roe)} />
-          <Row label={t.stock.yield} value={pct(analysis?.dividendYield)} source={lastDiv?.provenance.source} />
+          <Row label={<TermLabel entry={g.eps} levelLabels={levels} />} value={num(analysis?.eps, 2)} source={lastFin?.provenance.source} />
+          <Row label={<TermLabel entry={g.per} levelLabels={levels} />} value={num(analysis?.per, 2)} />
+          <Row label={<TermLabel entry={g.roe} levelLabels={levels} />} value={pct(analysis?.roe)} />
+          <Row label={<TermLabel entry={g.yield} levelLabels={levels} />} value={pct(analysis?.dividendYield)} source={lastDiv?.provenance.source} />
           <Row label={t.stock.divCagr} value={pct(analysis?.dividendCagr5y)} />
           <Row label={t.stock.epsCagr} value={pct(analysis?.epsCagr5y)} />
-          <Row label={t.stock.iv} value={xof(analysis?.intrinsicValue)} />
+          <Row label={<TermLabel entry={g.intrinsic} levelLabels={levels} />} value={xof(analysis?.intrinsicValue)} />
           <Row label={t.stock.methods} value={analysis?.intrinsicMethods.join(", ") ?? "—"} />
-          <Row label={t.stock.ideal} value={xof(rec?.idealEntryPrice)} />
-          <Row label={t.stock.maxEntry} value={xof(rec?.maximumEntryPrice)} />
+          <Row label={<TermLabel entry={g.ideal} levelLabels={levels} />} value={xof(rec?.idealEntryPrice)} />
+          <Row label={<TermLabel entry={g.maxEntry} levelLabels={levels} />} value={xof(rec?.maximumEntryPrice)} />
           <Row label={t.stock.source} value={lastQuote?.provenance.source ?? "—"} />
           <Row label={t.stock.retrieved} value={frDate(lastQuote?.provenance.retrievedAt)} />
         </div>
@@ -179,7 +190,15 @@ export default async function StockPage({ params }: { params: Promise<{ symbol: 
   );
 }
 
-function Row({ label, value, source }: { label: string; value: string; source?: string | null }) {
+function Row({
+  label,
+  value,
+  source,
+}: {
+  label: ReactNode;
+  value: string;
+  source?: string | null;
+}) {
   return (
     <div className="flex items-baseline justify-between gap-4 border-b border-white/5 py-1.5">
       <span className="text-muted">{label}</span>

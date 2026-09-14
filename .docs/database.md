@@ -1,47 +1,45 @@
 # Base de données — BRVM Investment Analyzer
 
-> Dernière mise à jour : 2026-08-30
+> Dernière mise à jour : 2026-09-13
 
-## Cible
+## Cible production
 
-PostgreSQL. Schéma : `prisma/schema.prisma` + `prisma/migrations/0001_init.sql`.  
-Prisma documente le modèle ; l’adaptateur runtime n’importe pas Prisma dans le domaine.
+**MySQL 8** = source de vérité (`PERSISTENCE_DRIVER=mysql`).  
+Schéma : `prisma/migrations/mysql/`.  
+Utilisateur app dédié `brvm_app` (pas root) — `npm run db:create-app-user`.
 
-## Runtime local (cette machine)
+```
+PERSISTENCE_DRIVER=mysql
+DATABASE_URL=mysql://brvm_app:***@127.0.0.1:3306/db_bourse
+npm run db:setup:mysql
+npm run db:migrate-from-store   # one-shot depuis data/store.json
+```
 
-`postgres.exe` (installateur EDB 16 présent dans `C:\Program Files\PostgreSQL\16`) est **bloqué** par le contrôle d’application Windows.  
-À la place : **PGlite** (`@electric-sql/pglite`) — PostgreSQL compatible, fichiers dans `.postgres/pglite`.
+Le file-store (`data/store.json`) reste un **cache / bootstrap** en runtime MySQL, et la vérité pour `PERSISTENCE_DRIVER=file` (tests).
+
+## Dev local (Laragon)
+
+```
+DATABASE_URL=mysql://root@127.0.0.1:3306/db_bourse
+ENABLE_ADMIN_PORTFOLIO_EXAMPLE=1
+```
+
+## PGlite (fallback)
 
 ```
 PERSISTENCE_DRIVER=pglite
 npm run db:setup
 ```
 
-Quand le service PostgreSQL sera autorisé :
-
-```
-DATABASE_URL=postgresql://postgres:brvm_local@127.0.0.1:5432/brvm_analyzer
-```
-
 ## Tests
 
-`PERSISTENCE_DRIVER=file` + `data/test-store.json` (isolé).
+`PERSISTENCE_DRIVER=file` forcé par `scripts/run-tests.mjs`.
 
-## Entités
+## Entités SQL
 
-- `company`, `data_source`, `data_source_failure`, `ruleset`
-- `market_quote` + `market_quote_revision`
-- `dividend` + `dividend_revision`
-- `financial_statement` + `financial_revision`
-- `raw_document`, `ingestion_run`, `email_log`
-- `analysis_result`, `recommendation_snapshot`, `performance_tracking`
-- `alert`, `scheduled_report`
-- `user_account`, `auth_session`
-- `index_quote`
-- **`listing_snapshot` + `listing_snapshot_item`** : chaque version de la liste officielle (jamais écrasée)
+- Plateforme : `user_account`, `auth_session`, `alert`, `portfolio_*`, `scheduled_report`, `company`, `listing_snapshot*`
+- Marché : `market_quote`, `dividend`, `financial_statement`, `analysis_result`, `recommendation_snapshot`
 
-## Règles
+## Ops
 
-- Pas d’écrasement silencieux → révisions + snapshots de liste.
-- Provenance obligatoire sur quotes / dividends / financials.
-- Radiation : `company.status = DELISTED`, historique conservé.
+Voir [runbook-production.md](./runbook-production.md).

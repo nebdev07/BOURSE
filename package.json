@@ -13,12 +13,17 @@
     "test:watch": "vitest",
     "seed": "node --experimental-strip-types --disable-warning=ExperimentalWarning --import ./scripts/register-loader.mjs src/infrastructure/seed/run-seed.ts",
     "db:setup": "node scripts/setup-postgres.mjs",
+    "db:setup:mysql": "node scripts/setup-mysql.mjs",
+    "db:migrate-from-store": "node --experimental-strip-types --disable-warning=ExperimentalWarning --import ./scripts/register-loader.mjs scripts/migrate-store-to-mysql.mjs",
+    "db:create-app-user": "node scripts/create-mysql-app-user.mjs",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.8",
     "@prisma/client": "^6.14.0",
+    "exceljs": "^4.4.0",
+    "mysql2": "^3.24.4",
     "next": "^15.5.0",
     "nodemailer": "^7.0.5",
     "react": "^19.1.0",

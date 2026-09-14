@@ -127,7 +127,14 @@ export function parseDividendCsv(text: string): Result<{
   };
   if (idx.symbol < 0 || idx.year < 0 || idx.gross < 0) return err("En-tête dividende invalide");
 
-  const rows = [];
+  const rows: Array<{
+    symbol: string;
+    exerciseYear: number;
+    grossAmount: number;
+    netAmount: number;
+    announcementDate: string | null;
+    paymentDate: string | null;
+  }> = [];
   const rejected: QuoteValidationError[] = [];
   table.slice(1).forEach((cols, i) => {
     const raw = cols.join(",");
@@ -188,7 +195,18 @@ export function parseFinancialCsv(text: string): Result<{
   };
   if (idx.symbol < 0 || idx.year < 0) return err("En-tête financier invalide");
 
-  const rows = [];
+  const rows: Array<{
+    symbol: string;
+    fiscalYear: number;
+    revenue: number | null;
+    netIncome: number | null;
+    eps: number | null;
+    roe: number | null;
+    debt: number | null;
+    equity: number | null;
+    cashFlow: number | null;
+    sharesOutstanding: number | null;
+  }> = [];
   const rejected: QuoteValidationError[] = [];
   table.slice(1).forEach((cols, i) => {
     const raw = cols.join(",");
