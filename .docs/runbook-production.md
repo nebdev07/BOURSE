@@ -34,7 +34,7 @@ Fichier env **hors git** : `.env.production` ou `/etc/brvm/env` :
 - `ADMIN_EMAIL=…`
 - `ENABLE_ADMIN_PORTFOLIO_EXAMPLE=0`
 
-## Démarrage
+## Démarrage (process Node)
 
 ```bash
 npm ci
@@ -45,6 +45,20 @@ NODE_ENV=production npm start   # écoute :3000
 Process manager (exemple systemd) : `WorkingDirectory` = repo, `EnvironmentFile` = secrets, `ExecStart=npm start`.
 
 PM2 : `pm2 start npm --name brvm -- start`.
+
+## Démarrage (Docker / VPS Autopilot)
+
+```bash
+docker build -t brvm-analyzer .
+docker run --rm -p 3000:3000 \
+  -e DATABASE_URL='mysql://…' \
+  -e JOB_SECRET='…' \
+  -e PERSISTENCE_DRIVER=mysql \
+  -v brvm_data:/app/data \
+  brvm-analyzer
+```
+
+Sur VPS Autopilot : rôle `deploy-app` → `app.env` + `db.env` (`DB_*` / `DATABASE_URL`), volume `/app/data`, schéma MySQL appliqué au boot par l’entrypoint.
 
 ## Reverse-proxy (Caddy)
 
