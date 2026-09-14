@@ -48,6 +48,7 @@
 
 ## 2026-09-14
 
+- UI : navigation utilisateur modernisée (une seule ligne) ; menu compte (avatar) pour profil/réglages/déconnexion ; **backoffice admin séparé** (`(admin)` + `AdminShell` latéral), hors barre utilisateur.
 - ADR-021 : backoffice `/admin` (rôles, effacer données, supprimer compte) ; seed admin bootstrap `nebdev07@gmail.com` au démarrage ; fin de la promotion via `ADMIN_EMAIL` / premier inscrit.
 - Packaging production : `Dockerfile` racine, `docker-entrypoint.sh` (map `DB_*` → `DATABASE_URL`, `JOB_SECRET` persisté, schéma MySQL au boot), `.dockerignore`.
 - `next.config` : ignore ESLint/TS errors pendant le build image (déploiement fiable).

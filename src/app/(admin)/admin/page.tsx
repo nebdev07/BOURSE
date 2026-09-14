@@ -140,25 +140,25 @@ export default function AdminPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <p className="text-xs uppercase tracking-[0.25em] text-brand-400">Backoffice</p>
-        <h2 className="mt-1 font-serif text-3xl">Administration plateforme</h2>
-        <p className="mt-2 text-sm text-muted">
-          Gestion des utilisateurs, rôles et données. MySQL/SQL : {postgres ? "connecté" : "fichier local"}.
+      <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-[#141924] to-[#0c0f16] p-6">
+        <p className="text-[10px] uppercase tracking-[0.28em] text-brand-400">Console</p>
+        <h2 className="mt-1 font-serif text-3xl">Pilotage plateforme</h2>
+        <p className="mt-2 max-w-2xl text-sm text-muted">
+          Utilisateurs, rôles, support et opérations marché. SQL : {postgres ? "connecté" : "fichier local"}.
         </p>
       </div>
-      {message && <p className="card border-brand-400/30 p-4 text-sm text-brand-500">{message}</p>}
+      {message && <p className="rounded-xl border border-brand-400/30 bg-brand-400/10 p-4 text-sm text-brand-400">{message}</p>}
 
-      <div className="flex flex-wrap gap-3">
-        <button type="button" className="btn-primary" onClick={() => void syncListing()}>
+      <section id="ops" className="scroll-mt-20 flex flex-wrap gap-3">
+        <button type="button" className="btn-primary !rounded-xl" onClick={() => void syncListing()}>
           Mettre à jour la liste officielle
         </button>
-        <button type="button" className="btn-primary" onClick={() => void analyze()}>
+        <button type="button" className="btn-primary !rounded-xl" onClick={() => void analyze()}>
           Relancer l&apos;analyse
         </button>
-      </div>
+      </section>
 
-      <section className="card overflow-hidden">
+      <section id="users" className="card scroll-mt-20 overflow-hidden">
         <div className="border-b border-white/10 px-5 py-4">
           <h3 className="font-serif text-xl">Utilisateurs & rôles</h3>
           <p className="mt-1 text-xs text-muted">
@@ -238,7 +238,7 @@ export default function AdminPage() {
         )}
       </section>
 
-      <section className="card overflow-hidden">
+      <section id="alerts" className="card scroll-mt-20 overflow-hidden">
         <div className="border-b border-white/10 px-5 py-4">
           <h3 className="font-serif text-xl">Alertes des utilisateurs (support)</h3>
           <input
@@ -284,7 +284,7 @@ export default function AdminPage() {
         </div>
       </section>
 
-      <section className="card overflow-hidden">
+      <section id="data" className="card scroll-mt-20 overflow-hidden">
         <div className="border-b border-white/10 px-5 py-4">
           <h3 className="font-serif text-xl">Historique des listes officielles</h3>
         </div>

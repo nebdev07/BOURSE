@@ -30,6 +30,9 @@ const fr = {
     admin: "Admin",
     guide: "Guide",
     portfolio: "Portefeuille",
+    account: "Compte",
+    accountSettings: "Profil & paramètres",
+    backoffice: "Backoffice admin",
   },
   tips: {
     label: "À savoir",
@@ -469,6 +472,9 @@ const en: typeof fr = {
     admin: "Admin",
     guide: "Guide",
     portfolio: "Portfolio",
+    account: "Account",
+    accountSettings: "Profile & settings",
+    backoffice: "Admin backoffice",
   },
   tips: {
     label: "Good to know",
