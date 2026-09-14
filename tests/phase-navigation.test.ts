@@ -33,7 +33,7 @@ describe("Navigation — cohérence user vs admin", () => {
   it("expose les routes backoffice (pas des ancres)", () => {
     assert.deepEqual(
       ADMIN_NAV.map((n) => n.href),
-      ["/admin", "/admin/users", "/admin/alerts", "/admin/ops", "/admin/data"],
+      ["/admin", "/admin/users", "/admin/alerts", "/admin/ops", "/admin/imports"],
     );
   });
 

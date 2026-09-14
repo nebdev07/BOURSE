@@ -33,11 +33,11 @@ export const ADMIN_NAV = [
   { href: "/admin/users", labelFr: "Utilisateurs", labelEn: "Users", exact: false },
   { href: "/admin/alerts", labelFr: "Support alertes", labelEn: "Alert support", exact: false },
   { href: "/admin/ops", labelFr: "Opérations", labelEn: "Operations", exact: false },
-  { href: "/admin/data", labelFr: "Données", labelEn: "Data", exact: false },
+  { href: "/admin/imports", labelFr: "Données", labelEn: "Data", exact: false },
 ] as const;
 
 /** @deprecated utiliser ADMIN_NAV */
-export const ADMIN_SECTION_ANCHORS = ["users", "alerts", "ops", "data"] as const;
+export const ADMIN_SECTION_ANCHORS = ["users", "alerts", "ops", "imports"] as const;
 
 export const ADMIN_APP_LINKS: NavLinkDef[] = ADMIN_NAV.map((n) => ({
   href: n.href,

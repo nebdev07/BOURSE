@@ -13,7 +13,7 @@ export default function AdminConsolePage() {
     { href: "/admin/users", label: "Utilisateurs", value: String(users.length), hint: "Comptes & rôles" },
     { href: "/admin/alerts", label: "Alertes support", value: String(alerts.length), hint: "Toutes les alertes" },
     { href: "/admin/ops", label: "Opérations", value: "2", hint: "Liste + analyse" },
-    { href: "/admin/data", label: "Données", value: String(listings.length), hint: "Snapshots & import" },
+    { href: "/admin/imports", label: "Données", value: String(listings.length), hint: "Snapshots & import" },
   ];
 
   return (
