@@ -38,7 +38,8 @@ RUN chmod +x /app/docker-entrypoint.sh \
   && mkdir -p /app/data \
   && chown -R nextjs:nodejs /app
 
-USER nextjs
+# Entrypoint démarre en root pour chown du volume /app/data, puis passe à nextjs.
+USER root
 EXPOSE 3000
 ENTRYPOINT ["/app/docker-entrypoint.sh"]
 CMD ["npm", "run", "start", "--", "-p", "3000"]
