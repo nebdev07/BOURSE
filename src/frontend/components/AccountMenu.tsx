@@ -67,6 +67,16 @@ export function AccountMenu({ me }: { me: Me }) {
             <p className="truncate text-xs text-muted">{me.email}</p>
           </div>
           <div className="p-1.5">
+            {me.role === "admin" && (
+              <Link
+                role="menuitem"
+                href="/admin"
+                className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-emerald-300 hover:bg-emerald-500/10"
+                onClick={() => setOpen(false)}
+              >
+                {t.nav.backoffice}
+              </Link>
+            )}
             <Link
               role="menuitem"
               href="/settings"
@@ -76,16 +86,6 @@ export function AccountMenu({ me }: { me: Me }) {
               <ProfileIcon className="h-4 w-4 text-brand-400" />
               {t.nav.accountSettings}
             </Link>
-            {me.role === "admin" && (
-              <Link
-                role="menuitem"
-                href="/admin"
-                className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm text-brand-400 hover:bg-white/5"
-                onClick={() => setOpen(false)}
-              >
-                {t.nav.backoffice}
-              </Link>
-            )}
             <button
               role="menuitem"
               type="button"

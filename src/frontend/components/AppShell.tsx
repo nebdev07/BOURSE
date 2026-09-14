@@ -6,12 +6,13 @@ import { useEffect, useState } from "react";
 import { LanguageSwitcher } from "@/frontend/i18n/LanguageSwitcher";
 import { useI18n } from "@/frontend/i18n/provider";
 import { AccountMenu } from "@/frontend/components/AccountMenu";
+import { USER_APP_LINKS } from "@/frontend/navigation/routes";
 
 type Me = { id: string; email: string; name: string; role: "user" | "admin" };
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [me, setMe] = useState<Me | null>(null);
   const [open, setOpen] = useState(false);
 
@@ -22,17 +23,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     setOpen(false);
   }, [path]);
 
-  // Navigation applicative uniquement — compte / admin hors barre (menu profil).
-  const links = [
-    { href: "/dashboard", label: t.nav.dashboard },
-    { href: "/stocks", label: t.nav.stocks },
-    { href: "/recommendations", label: t.nav.recos },
-    { href: "/alerts", label: t.nav.alerts, auth: true },
-    { href: "/portfolio", label: t.nav.portfolio, auth: true },
-    { href: "/guide", label: t.nav.guide },
-  ];
+  const labelByHref: Record<string, string> = {
+    "/dashboard": t.nav.dashboard,
+    "/stocks": t.nav.stocks,
+    "/recommendations": t.nav.recos,
+    "/alerts": t.nav.alerts,
+    "/portfolio": t.nav.portfolio,
+    "/guide": t.nav.guide,
+  };
 
-  const visible = links.filter((l) => !l.auth || me);
+  const visible = USER_APP_LINKS.filter((l) => l.userChrome && (!l.auth || me));
 
   function NavLink({ href, label }: { href: string; label: string }) {
     const active = path === href || (href !== "/dashboard" && path.startsWith(href));
@@ -48,8 +48,27 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     );
   }
 
+  const isAdminOnUserChrome = me?.role === "admin";
+
   return (
-    <div className="min-h-screen bg-brand-50">
+    <div className="min-h-screen bg-brand-50" data-shell="user">
+      {isAdminOnUserChrome && (
+        <div className="border-b border-amber-500/30 bg-amber-500/10">
+          <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 px-4 py-2 sm:px-6">
+            <p className="text-xs text-amber-100/90">
+              {locale === "en"
+                ? "User app view — admin backoffice is a separate interface."
+                : "Vue application utilisateur — le backoffice admin est une interface séparée."}
+            </p>
+            <Link
+              href="/admin"
+              className="rounded-lg bg-amber-500/20 px-3 py-1 text-xs font-semibold text-amber-200 hover:bg-amber-500/30"
+            >
+              {t.nav.backoffice}
+            </Link>
+          </div>
+        </div>
+      )}
       <header className="sticky top-0 z-30 border-b border-white/10 bg-[#0d1017]/92 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6">
           <Link href="/" className="min-w-0 shrink-0">
@@ -57,9 +76,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <h1 className="truncate font-serif text-base leading-tight text-ink sm:text-lg">{t.brand.short}</h1>
           </Link>
 
-          <nav className="ml-2 hidden min-w-0 flex-1 items-center justify-center gap-0.5 md:flex">
+          <nav className="ml-2 hidden min-w-0 flex-1 items-center justify-center gap-0.5 md:flex" aria-label="User">
             {visible.map((l) => (
-              <NavLink key={l.href} href={l.href} label={l.label} />
+              <NavLink key={l.href} href={l.href} label={labelByHref[l.href] ?? l.href} />
             ))}
           </nav>
 
@@ -90,9 +109,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
 
         {open && (
-          <nav className="flex flex-col gap-0.5 border-t border-white/10 px-3 py-3 md:hidden">
+          <nav className="flex flex-col gap-0.5 border-t border-white/10 px-3 py-3 md:hidden" aria-label="User mobile">
             {visible.map((l) => (
-              <NavLink key={l.href} href={l.href} label={l.label} />
+              <NavLink key={l.href} href={l.href} label={labelByHref[l.href] ?? l.href} />
             ))}
             {!me && (
               <>
@@ -107,6 +126,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             {me && (
               <Link href="/settings" className="rounded-lg px-3 py-2 text-sm text-muted">
                 {t.nav.accountSettings}
+              </Link>
+            )}
+            {me?.role === "admin" && (
+              <Link href="/admin" className="rounded-lg px-3 py-2 text-sm text-brand-400">
+                {t.nav.backoffice}
               </Link>
             )}
           </nav>

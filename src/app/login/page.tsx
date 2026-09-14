@@ -26,7 +26,8 @@ export default function LoginPage() {
       setError(json.error ?? t.auth.loginFail);
       return;
     }
-    router.push("/alerts");
+    const role = json.user?.role === "admin" ? "admin" : "user";
+    router.push(role === "admin" ? "/admin" : "/dashboard");
     router.refresh();
   }
 
