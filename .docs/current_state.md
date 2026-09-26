@@ -1,7 +1,7 @@
 # État actuel — BRVM Investment Analyzer
 
 > Distinguer spécifié vs implémenté.  
-> Dernière mise à jour : 2026-09-14
+> Dernière mise à jour : 2026-09-26
 
 ## Spécifié
 

@@ -46,6 +46,10 @@
 - Persistence **MySQL** (`db_bourse`, Laragon) : schéma `prisma/migrations/mysql/`, driver `mysql2`, `npm run db:setup:mysql` ; file-store reste source de vérité, SQL = miroir/hydratation.
 - Admin : `ADMIN_EMAIL` promu aussi au login / lecture session (pas seulement à l’inscription).
 
+## 2026-09-26
+
+- Fiches actions : graphiques cours / dividendes (Recharts) — rendu **client après mount**, `ResponsiveContainer` 100 %, série allégée, état vide. Corrige l’absence d’affichage du graphique d’activité en prod (SSR / taille 0).
+
 ## 2026-09-14
 
 - Backoffice : menus = **vraies routes** (`/admin`, `/admin/users`, `/admin/alerts`, `/admin/ops`, `/admin/data`) avec état **actif** visible ; plus d’ancres `#` qui montraient la même page.
