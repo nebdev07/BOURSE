@@ -20,6 +20,7 @@ Plateforme publique multi-comptes, admin restreint, **MySQL source de vérité**
 - Health : `GET /api/health`.
 - Runbook : `.docs/runbook-production.md` ; backups `scripts/backup-mysql.sh`.
 - **Docker prod** : `Dockerfile` + entrypoint (`DB_*`→`DATABASE_URL`, schéma MySQL au boot, volume `/app/data`).
+- Fiches `/stocks/[symbol]` : graphiques Recharts (cours / dividendes) stables en prod Docker.
 - Portefeuille, info-bulles, noms officiels BRVM, etc. (chantiers antérieurs).
 
 ## Runtime local
